@@ -4,3 +4,6 @@ LIBS=-lraylib -lm -lpthread -ldl -lrt
 
 nbody: main.c
 	$(CC) $(CFLAGS) $(LIBS) -o nbody main.c
+
+debug: main.c
+	$(CC) -g $(CFLAGS) $(LIBS) -o nbody main.c

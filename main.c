@@ -78,9 +78,6 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BACKGROUND);
 
-        // draw target ring under circle
-        DrawRing(mousePos, candidateRadius-3, candidateRadius, 0, 360, candidateRadius, BRIGHT);
-
         for (int i = 0; i < bodyNum; i++) {
             Body b = bodies[i];
             DrawCircleV(b.pos, b.radius, b.clr);
@@ -88,6 +85,9 @@ int main(void) {
 
         sprintf(textFPS, "%d", GetFPS());
         DrawText(textFPS, SCREENWIDTH/20, SCREENHEIGHT/20, 25, GREY);
+
+        // draw target ring under circle
+        DrawRing(mousePos, candidateRadius-3, candidateRadius, 0, 360, candidateRadius, BRIGHT);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
