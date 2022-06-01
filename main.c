@@ -5,6 +5,7 @@
 #define BACKGROUND (Color){   5,  31,  57, 255 }
 #define FOREGROUND (Color){ 197,  58, 157, 255 }
 #define GREY 	   (Color){  74,  36, 128, 255 }
+#define BRIGHT     (Color){ 255, 142, 128, 255 }
 
 typedef struct Body {
     Vector2 pos;
@@ -20,12 +21,12 @@ int main(void) {
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int SCREENWIDTH = 960;
-    const int SCREENHEIGHT = 540;
+    const int SCREENWIDTH = 1920;
+    const int SCREENHEIGHT = 1080;
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "nbody");
-    
+
     // it's only this high for development, so I can get a better idea of what's
     // taxing the game the most. This should be my monitor's refresh rate for
     // actual gameplay
@@ -50,46 +51,46 @@ int main(void) {
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-	/* // Update */
-	/* //---------------------------------------------------------------------------------- */
+        /* // Update */
+        /* //---------------------------------------------------------------------------------- */
 
-	// get mouse position
-	Vector2 mousePos = GetMousePosition();
-	
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && bodyNum < 10) {
-	    bodies[bodyNum] = InitBody(mousePos, candidateRadius, 0, 0, FOREGROUND);
-	    bodyNum++;
-	}
+        // get mouse position
+        Vector2 mousePos = GetMousePosition();
 
-	// control curve - when candidate radius smaller, scroll makes smaller
-	// adjustment. when radius larger, scroll makes larger adjustment.
-	int scroll = GetMouseWheelMove();
-	if (scroll) {
-	    inputCurve = candidateRadius / 10;
-	    if (inputCurve < 1) inputCurve = 1;
-	    candidateRadius += (scroll * inputCurve * SENSITIVITY);   
-	    if (candidateRadius < 5) candidateRadius = 5;
-	}
-	/* //---------------------------------------------------------------------------------- */
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && bodyNum < 10) {
+            bodies[bodyNum] = InitBody(mousePos, candidateRadius, 0, 0, FOREGROUND);
+            bodyNum++;
+        }
 
-	// Draw
-	//----------------------------------------------------------------------------------
-	BeginDrawing();
-	ClearBackground(BACKGROUND);
+        // control curve - when candidate radius smaller, scroll makes smaller
+        // adjustment. when radius larger, scroll makes larger adjustment.
+        int scroll = GetMouseWheelMove();
+        if (scroll) {
+            inputCurve = candidateRadius / 10;
+            if (inputCurve < 1) inputCurve = 1;
+            candidateRadius += (scroll * inputCurve * SENSITIVITY);
+            if (candidateRadius < 5) candidateRadius = 5;
+        }
+        /* //---------------------------------------------------------------------------------- */
 
-	DrawCircleV(mousePos, candidateRadius, FOREGROUND);
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+        ClearBackground(BACKGROUND);
 
-	for (int i = 0; i < bodyNum; i++) {
-	    Body b = bodies[i];
-	    DrawCircleV(b.pos, b.radius, b.clr);
-	}
-	/* DrawText("move ball with mouse and click mouse button to change color", 10, 10, 20, FOREGROUND); */
-	
-	sprintf(textFPS, "%d", GetFPS());
-	DrawText(textFPS, SCREENWIDTH/20, SCREENHEIGHT/20, 25, GREY);
+        // draw target ring under circle
+        DrawRing(mousePos, candidateRadius-3, candidateRadius, 0, 360, candidateRadius, BRIGHT);
 
-	EndDrawing();
-	//----------------------------------------------------------------------------------
+        for (int i = 0; i < bodyNum; i++) {
+            Body b = bodies[i];
+            DrawCircleV(b.pos, b.radius, b.clr);
+        }
+
+        sprintf(textFPS, "%d", GetFPS());
+        DrawText(textFPS, SCREENWIDTH/20, SCREENHEIGHT/20, 25, GREY);
+
+        EndDrawing();
+        //----------------------------------------------------------------------------------
     }
 
 
