@@ -2,27 +2,50 @@
 #include <stdio.h>
 #include "raylib.h"
 
-#define BACKGROUND (Color){ 147, 161, 161, 255 }
-#define FOREGROUND (Color){  34,  71,  80, 255 }
+#define BACKGROUND (Color){   5,  31,  57, 255 }
+#define FOREGROUND (Color){ 197,  58, 157, 255 }
+#define GREY 	   (Color){  74,  36, 128, 255 }
+
+typedef struct Body {
+    Vector2 pos;
+    float vel_x;
+    float vel_y;
+    int radius;
+    Color clr;
+} Body;
+
+Body InitBody(Vector2 pos, int radius, float vel_x, float vel_y, Color clr);
 
 int main(void) {
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 960;
-    const int screenHeight = 540;
+    const int SCREENWIDTH = 960;
+    const int SCREENHEIGHT = 540;
 
-    InitWindow(screenWidth, screenHeight, "nbody");
-
-    SetTargetFPS(60);
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    InitWindow(SCREENWIDTH, SCREENHEIGHT, "nbody");
+    
+    // it's only this high for development, so I can get a better idea of what's
+    // taxing the game the most. This should be my monitor's refresh rate for
+    // actual gameplay
+    SetTargetFPS(1000);
     //---------------------------------------------------------------------------------------
 
     // INITIAL VARIABLES
 
     // for scrolling to change candidate size
+    const int SENSITIVITY = 2;
     int candidateRadius = 10;
-    int scroll = 0;
-    int inputScale = 1;
+    int inputCurve = 1;
+
+    // for displaying FPS
+    char textFPS[5];
+
+    // le gravitation
+    const int MAX_BODIES = 10;
+    Body bodies[MAX_BODIES];
+    int bodyNum = 0;
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -30,13 +53,23 @@ int main(void) {
 	/* // Update */
 	/* //---------------------------------------------------------------------------------- */
 
-	/* if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) ballColor = MAROON; */
-	/* else if (IsMouseButtonPressed(MOUSE_BUTTON_MIDDLE)) ballColor = LIME; */
-	/* else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) ballColor = DARKBLUE; */
-	/* else if (IsMouseButtonPressed(MOUSE_BUTTON_SIDE)) ballColor = PURPLE; */
-	/* else if (IsMouseButtonPressed(MOUSE_BUTTON_EXTRA)) ballColor = YELLOW; */
-	/* else if (IsMouseButtonPressed(MOUSE_BUTTON_FORWARD)) ballColor = ORANGE; */
-	/* else if (IsMouseButtonPressed(MOUSE_BUTTON_BACK)) ballColor = BEIGE; */
+	// get mouse position
+	Vector2 mousePos = GetMousePosition();
+	
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && bodyNum < 10) {
+	    bodies[bodyNum] = InitBody(mousePos, candidateRadius, 0, 0, FOREGROUND);
+	    bodyNum++;
+	}
+
+	// control curve - when candidate radius smaller, scroll makes smaller
+	// adjustment. when radius larger, scroll makes larger adjustment.
+	int scroll = GetMouseWheelMove();
+	if (scroll) {
+	    inputCurve = candidateRadius / 10;
+	    if (inputCurve < 1) inputCurve = 1;
+	    candidateRadius += (scroll * inputCurve * SENSITIVITY);   
+	    if (candidateRadius < 5) candidateRadius = 5;
+	}
 	/* //---------------------------------------------------------------------------------- */
 
 	// Draw
@@ -44,27 +77,33 @@ int main(void) {
 	BeginDrawing();
 	ClearBackground(BACKGROUND);
 
-	// control curve - when candidate radius smaller, scroll makes smaller
-	// adjustment. when radius larger, scroll makes larger adjustment.
-	scroll = GetMouseWheelMove();
-	if (GetMouseWheelMove()) {
-	    inputScale = candidateRadius / 10;
-	    if (inputScale < 1) inputScale = 1;
-	    candidateRadius += (scroll * inputScale);   
-	    if (candidateRadius < 5) candidateRadius = 5;
-	}
-	DrawCircleV(GetMousePosition(), candidateRadius, FOREGROUND);
+	DrawCircleV(mousePos, candidateRadius, FOREGROUND);
 
+	for (int i = 0; i < bodyNum; i++) {
+	    Body b = bodies[i];
+	    DrawCircleV(b.pos, b.radius, b.clr);
+	}
 	/* DrawText("move ball with mouse and click mouse button to change color", 10, 10, 20, FOREGROUND); */
+	
+	sprintf(textFPS, "%d", GetFPS());
+	DrawText(textFPS, SCREENWIDTH/20, SCREENHEIGHT/20, 25, GREY);
 
 	EndDrawing();
 	//----------------------------------------------------------------------------------
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
 
+    CloseWindow();
     return 0;
+}
+
+Body InitBody(Vector2 pos, int radius, float vel_x, float vel_y, Color clr) {
+    Body body;
+    body.pos = pos;
+    body.radius = radius;
+    body.vel_x = vel_x;
+    body.vel_y = vel_y;
+    body.clr = clr;
+
+    return body;
 }
