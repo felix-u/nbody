@@ -8,13 +8,13 @@
 #define GREY 	   (Color){  74,  36, 128, 255 }
 #define BRIGHT     (Color){ 255, 142, 128, 255 }
 
-// this is scaled! actual G is E-11
-#define G_NEWTON   (6.6743 * pow(10, -11))
+// this is scaled! actual value is of magnitude E-11
+#define G_NEWTON   (6.6743 * pow(10, -6))
 
 typedef struct Body {
     Vector2 pos;
-    float vel_x;
-    float vel_y;
+    double vel_x;
+    double vel_y;
     int radius;
     Color clr;
     int mass;
@@ -49,6 +49,8 @@ int main(void) {
     const int MAX_BODIES = 10;
     Body bodies[MAX_BODIES];
     int bodyNum = 0;
+    const int PIXELS_PER_METRE = 10;
+    const long int MASS_PER_SQUARE_PIXEL = 1000000;
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -61,7 +63,7 @@ int main(void) {
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && bodyNum < 10) {
             bodies[bodyNum] = InitBody(mousePos, candidateRadius, 0, 0,
-                                       FOREGROUND, pow(candidateRadius, 2));
+                FOREGROUND, pow(candidateRadius, 2) * MASS_PER_SQUARE_PIXEL);
             bodyNum++;
         }
 
@@ -76,17 +78,29 @@ int main(void) {
         }
 
         // n-body calculations
+        float delta = GetFrameTime();
         for (int i = 0; i < bodyNum; i++) {
             for (int comp = 0; comp < i; comp++) if (i != comp) {
-                float x_distance = fabs( bodies[i].pos.x - bodies[comp].pos.x );
-                float y_distance = fabs( bodies[i].pos.y - bodies[comp].pos.y );
-                int distance = sqrt( pow(x_distance , 2) + pow(y_distance , 2) );
-                // law of universal gravitation
-                double force = G_NEWTON * bodies[i].mass * bodies[comp].mass
-                    / pow(distance, 2);
-                // should be atan
-                float direction = asin(y_distance / x_distance);
-                printf("%0.11f Newtons at %0.2f\n", force, direction);
+                float x_distance = ( bodies[i].pos.x - bodies[comp].pos.x ) / PIXELS_PER_METRE;
+                float y_distance = ( bodies[i].pos.y - bodies[comp].pos.y ) / PIXELS_PER_METRE;
+
+                // int distance = sqrt( pow(x_distance , 2) + pow(y_distance , 2) );
+                // // law of universal gravitation
+                // double force = G_NEWTON * bodies[i].mass * bodies[comp].mass
+                //     / pow(distance, 2);
+                // float direction = atan2(y_distance, x_distance);
+                // printf("%0.11f Newtons at %0.2f\n", force, direction);
+
+                double force_x = G_NEWTON * bodies[i].mass * bodies[comp].mass
+                    / pow(x_distance, 2);
+                double force_y = G_NEWTON * bodies[i].mass * bodies[comp].mass
+                    / pow(y_distance, 2);
+
+                double accel_x = delta * force_x / bodies[i].mass;
+                double accel_y = delta * force_y / bodies[i].mass;
+                bodies[i].vel_x += accel_x;
+                bodies[i].vel_y += accel_y;
+                printf("x %0.11f, y %0.11f\n", accel_x, accel_y);
             }
         }
 
@@ -97,8 +111,11 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BACKGROUND);
 
+        // draw bodies
         for (int i = 0; i < bodyNum; i++) {
             Body b = bodies[i];
+            b.pos.x += b.vel_x;
+            b.pos.y += b.vel_y;
             DrawCircleV(b.pos, b.radius, b.clr);
         }
 
