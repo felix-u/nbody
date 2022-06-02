@@ -8,8 +8,8 @@
 #define GREY 	   (Color){  74,  36, 128, 255 }
 #define BRIGHT     (Color){ 255, 142, 128, 255 }
 
-// this is scaled! actual value is of magnitude E-11
-#define G_NEWTON   (6.6743 * pow(10, -6))
+// this may or may not be scaled - actual value is of magnitude E-11
+#define G_NEWTON   (6.6743 * pow(10, -11))
 
 typedef struct Body {
     Vector2 pos;
@@ -17,7 +17,7 @@ typedef struct Body {
     double vel_y;
     int radius;
     Color clr;
-    int mass;
+    long int mass;
 } Body;
 
 Body InitBody(Vector2 pos, int radius, float vel_x, float vel_y, Color clr, int mass);
@@ -50,7 +50,7 @@ int main(void) {
     Body bodies[MAX_BODIES];
     int bodyNum = 0;
     const int PIXELS_PER_METRE = 10;
-    const long int MASS_PER_SQUARE_PIXEL = 1000000;
+    const long int MASS_PER_SQUARE_PIXEL = 10000;
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -81,26 +81,19 @@ int main(void) {
         float delta = GetFrameTime();
         for (int i = 0; i < bodyNum; i++) {
             for (int comp = 0; comp < i; comp++) if (i != comp) {
-                float x_distance = ( bodies[i].pos.x - bodies[comp].pos.x ) / PIXELS_PER_METRE;
-                float y_distance = ( bodies[i].pos.y - bodies[comp].pos.y ) / PIXELS_PER_METRE;
+                double x_distance = ( bodies[i].pos.x - bodies[comp].pos.x ) / PIXELS_PER_METRE;
+                double y_distance = ( bodies[i].pos.y - bodies[comp].pos.y ) / PIXELS_PER_METRE;
+                double distance = sqrt(pow(x_distance, 2) + pow(y_distance, 2));
+                double angleItoComp = atan2(y_distance, x_distance);
 
-                // int distance = sqrt( pow(x_distance , 2) + pow(y_distance , 2) );
-                // // law of universal gravitation
-                // double force = G_NEWTON * bodies[i].mass * bodies[comp].mass
-                //     / pow(distance, 2);
-                // float direction = atan2(y_distance, x_distance);
-                // printf("%0.11f Newtons at %0.2f\n", force, direction);
+                long double force = G_NEWTON * bodies[i].mass * bodies[comp].mass
+                                / pow(distance, 2);
+                long double x_force = force * cosl(angleItoComp);
+                long double y_force = force * sinl(angleItoComp);
 
-                double force_x = G_NEWTON * bodies[i].mass * bodies[comp].mass
-                    / pow(x_distance, 2);
-                double force_y = G_NEWTON * bodies[i].mass * bodies[comp].mass
-                    / pow(y_distance, 2);
-
-                double accel_x = delta * force_x / bodies[i].mass;
-                double accel_y = delta * force_y / bodies[i].mass;
-                bodies[i].vel_x += accel_x;
-                bodies[i].vel_y += accel_y;
-                printf("x %0.11f, y %0.11f\n", accel_x, accel_y);
+                printf("body %d at dist %0.2fm,", i+1, distance);
+                printf(" angle %0.2f from body %d", angleItoComp, comp+1);
+                printf(" feeling %0.3LfN x, %0.3LfN y)\n", x_force, y_force);
             }
         }
 
