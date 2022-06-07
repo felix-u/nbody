@@ -1,0 +1,1 @@
+set `AMD_VULKAN_ICD=RADV` on AMD

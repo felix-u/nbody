@@ -1,2 +1,6 @@
 nbody
 **/\#*
+
+# Added by cargo
+
+/target

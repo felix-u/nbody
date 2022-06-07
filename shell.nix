@@ -1,24 +1,19 @@
-{ pkgs ? import <nixpkgs> {} }:
-let
-  raylib-wayland = pkgs.raylib.overrideAttrs (oldAttrs: rec {
-    # buildInputs = with pkgs; (oldAttrs.buildInputs or []) ++
-    #                          [ glfw-wayland wayland libxkbcommon ];
-    buildInputs = with pkgs; [
-      mesa libGLU glfw-wayland wayland libxkbcommon
-      alsa-lib libpulseaudio
-    ];
 
-    cmakeFlags = (oldAttrs.cmakeFlags or []) ++
-                 [ "-DCUSTOMIZE_BUILD=ON"
-                   "-DGLFW_BUILD_WAYLAND=ON"
-                   "-DGLFW_BUILD_X11=OFF"
-                   "-DUSE_WAYLAND_DISPLAY=ON"
-                   "-DINCLUDE_EVERYTHING=OFF"
-                 ];
-  });
-in pkgs.mkShell {
+# shell.nix
+
+{ pkgs ? import <nixpkgs> {} }:
+with pkgs; mkShell {
   nativeBuildInputs = [
-    # raylib-wayland
-    pkgs.raylib
+    pkgconfig
+    clang lld # To use lld linker
   ];
+  buildInputs = [
+    udev alsaLib vulkan-loader
+    xorg.libX11 xorg.libXcursor xorg.libXrandr xorg.libXi # To use x11 feature
+    libxkbcommon wayland # To use wayland feature
+  ];
+  shellHook = ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [
+    udev alsaLib vulkan-loader
+    libxkbcommon wayland # To use wayland feature
+  ]}"'';
 }
