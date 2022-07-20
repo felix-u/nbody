@@ -8,7 +8,7 @@ use palette::CATPPUCCIN as PALETTE;
 pub const ASPECT: f32 = 16.0/9.0;
 
 fn main() {
-    let width: f32 = 1920.0;
+    let width: f32 = 1280.0;
     App::new()
         .insert_resource(ClearColor(PALETTE.background))
         .insert_resource(WindowDescriptor {
@@ -19,7 +19,7 @@ fn main() {
             resize_constraints: WindowResizeConstraints::default(),
             scale_factor_override: None,
             present_mode: PresentMode::Fifo,
-            resizable: true,
+            resizable: false,
             decorations: true,
             cursor_locked: false,
             cursor_visible: true,
