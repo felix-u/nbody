@@ -1,25 +1,26 @@
-use crate::miniquad::conf::{LinuxBackend, Platform};
-use macroquad::prelude::*;
+use bevy::prelude::*;
+use bevy::window::{PresentMode, WindowMode, WindowResizeConstraints};
 
-fn window_conf() -> Conf {
-    Conf {
-        window_title: "Window Conf".to_owned(),
-        fullscreen: true,
-        platform: Platform {linux_backend : LinuxBackend::WaylandOnly, .. Default::default()},
-        ..Default::default()
-    }
-}
+pub const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
 
-#[macroquad::main(window_conf)]
-async fn main() {
-    loop {
-        clear_background(RED);
-
-        draw_line(40.0, 40.0, 100.0, 200.0, 15.0, BLUE);
-        draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 120.0, 60.0, GREEN);
-        draw_circle(screen_width() - 30.0, screen_height() - 30.0, 15.0, YELLOW);
-        draw_text("HELLO", 20.0, 20.0, 20.0, DARKGRAY);
-
-        next_frame().await
-    }
+fn main() {
+    App::new()
+        .insert_resource(ClearColor(CLEAR))
+        .insert_resource(WindowDescriptor {
+            title: "Fucking brilliant, innit?".to_string(),
+            width: 1920.,
+            height: 1080.,
+            position: None,
+            resize_constraints: WindowResizeConstraints::default(),
+            scale_factor_override: None,
+            present_mode: PresentMode::Fifo,
+            resizable: true,
+            decorations: true,
+            cursor_locked: false,
+            cursor_visible: true,
+            mode: WindowMode::Windowed,
+            transparent: false,
+        })
+        .add_plugins(DefaultPlugins)
+        .run();
 }
