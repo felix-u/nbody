@@ -1,11 +1,25 @@
-use bevy::{prelude::*, window::*};
-use bevy::render::camera::ScalingMode;
-use bevy::sprite::MaterialMesh2dBundle;
+use bevy::{
+    core::FixedTimestep,
+    math::const_vec2,
+    prelude::*, 
+    window::*,
+    render::camera::ScalingMode,
+    sprite::MaterialMesh2dBundle,
+};
+
+// amount of time that should elapse between each physics step
+const TIME_STEP: f32 = 1.0 / 60.0;
+
+// objects
+const SPEED: f32 = 500.0;
+const STARTING_POSITION: const_vec2!([-0.5, -0.5]);
+const SIZE: f32 = 0.2;
 
 mod palette;
 use palette::CATPPUCCIN as PALETTE;
 
 pub const ASPECT: f32 = 16.0/9.0;
+
 
 fn main() {
     let width: f32 = 1280.0;
@@ -26,11 +40,17 @@ fn main() {
             mode: WindowMode::Windowed,
             transparent: false,
         })
+        .add_plugins(DefaultPlugins)
         .add_startup_system(spawn_camera)
         .add_startup_system(spawn_mesh)
-        .add_plugins(DefaultPlugins)
+        .add_system(bevy::input::system::exit_on_esc_system)
         .run();
 }
+
+
+#[derive(Component)]
+struct Object;
+
 
 fn spawn_camera(mut commands: Commands) {
     let mut camera = OrthographicCameraBundle::new_2d();
@@ -44,6 +64,7 @@ fn spawn_camera(mut commands: Commands) {
     
     commands.spawn_bundle(camera);
 }
+
 
 fn spawn_mesh(
     mut commands: Commands,
