@@ -12,11 +12,11 @@ const TIME_STEP: f32 = 1.0 / 60.0;
 
 // objects
 const SPEED: f32 = 500.0;
-const STARTING_POSITION: const_vec2!([-0.5, -0.5]);
+// const STARTING_POSITION: const_vec2!([-0.5, -0.5]);
 const SIZE: f32 = 0.2;
 
 mod palette;
-use palette::CATPPUCCIN as PALETTE;
+use palette::ONEBIT as PALETTE;
 
 pub const ASPECT: f32 = 16.0/9.0;
 
@@ -74,7 +74,7 @@ fn spawn_mesh(
     commands.spawn_bundle(MaterialMesh2dBundle {
         mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
         transform: Transform::default().with_scale(Vec3::splat(0.5)),
-        material: materials.add(ColorMaterial::from(PALETTE.magenta)),
+        material: materials.add(ColorMaterial::from(PALETTE.foreground)),
         ..default()
     });
 }
