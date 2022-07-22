@@ -13,3 +13,4 @@ opt-level = 3
 
 [dependencies]
 bevy = { version = "0.7", features = ["wayland", "dynamic"] }
+rand = "0.7.3"
