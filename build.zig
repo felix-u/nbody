@@ -32,5 +32,5 @@ pub fn build(b: *std.build.Builder) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
 
-    // exe.linkLibC();
+    exe.linkLibC();
 }
