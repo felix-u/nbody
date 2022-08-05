@@ -33,4 +33,5 @@ pub fn build(b: *std.build.Builder) void {
     test_step.dependOn(&exe_tests.step);
 
     exe.linkLibC();
+    exe.addPackagePath("SDL2", "libs/SDL2-2.0.20-dev/SDL2.zig");
 }
