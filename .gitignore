@@ -1,6 +1,4 @@
 nbody
 **/\#*
-
-# Added by cargo
-
-/target
+zig-out/
+zig-cache/
