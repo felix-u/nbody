@@ -33,4 +33,5 @@ pub fn build(b: *std.build.Builder) void {
     test_step.dependOn(&exe_tests.step);
 
     exe.linkLibC();
+    exe.addPackagePath("renderer", "src/renderer.zig");
 }
