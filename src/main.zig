@@ -22,20 +22,26 @@ pub fn main() anyerror!void {
 
     // TODO: actually work out how much memory the whole buffer will take
     //       after ANSI escape codes + unicode char
-    var buf = try alloc.alloc(u8, win.ws_col*win.ws_row);
+    var char_num = win.ws_col * win.ws_row;
+    var buf = try alloc.alloc(u8, char_num);
     defer alloc.free(buf);
 
+    var buf_stream = io.fixedBufferStream(buf);
     var stdout_writer = io.getStdOut().writer();
     try stdout_writer.writeAll(render.term_on);
     var i: u16 = 0;
     while (i < (win.ws_col * win.ws_row)) : (i += 1) {
-        for (buf) |*char| char.* = ' ';
-        buf[i/100] = 'X';
+        try buf_stream.writer().writeAll(render.new_frame);
+        // try buf_stream.writer().print("Hello, World {d}", .{i});
+        try buf_stream.writer().print("Hello, World {s} END", .{" " ** i});
+        // for (i) |_, index| {
+        //
+        // }
+        // buf[i/100] = 'X';
         try stdout_writer.writeAll(buf);
+        // buf_stream.reset();
     }
     try stdout_writer.writeAll(render.term_off);
 
-    // var buf_stream = io.fixedBufferStream(&buf);
-    // try buf_stream.writer().print("Hello, World", .{});
 
 }

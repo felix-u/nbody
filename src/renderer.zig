@@ -52,6 +52,8 @@ pub const screen_buf_off = csi ++ "?1049l"; //l=low
 pub const term_on = screen_buf_on ++ cursor_hide ++ cursor_home ++ screen_clear ++ fmt_default;
 pub const term_off = screen_buf_off ++ cursor_show ++ "\n";
 
+pub const new_frame = cursor_home ++ screen_clear;
+
 
 
 
