@@ -1,15 +1,14 @@
 const std = @import("std");
 const print = std.debug.print;
-const sdl = @import("SDL2");
+const c = @cImport({
+    @cInclude("sys/ioctl.h");
+    @cInclude("stdio.h");
+});
+// const c = std.c;
+
 
 pub fn main() anyerror!void {
-
-    // initialise SDL2
-    // if (sdl.SDL_Init(sdl.SDL_INIT_EVERYTHING) != 0) {
-    //     print("SDL_Init Error: {s}\n", .{sdl.SDL_GetError()});
-    //     std.os.exit(69); // UNAVAILABLE
-    // }
-    // defer sdl.SDL_Quit();
-
-    print("wassmup", .{});
+    var win: c.winsize = undefined;
+    _ = c.ioctl(0, c.TIOCGWINSZ, &win);
+    print("Terminal dimensions are width:{d} x height:{d}\n", .{win.ws_col, win.ws_row});
 }
