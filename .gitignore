@@ -2,3 +2,4 @@ nbody
 **/\#*
 zig-out/
 zig-cache/
+target/
