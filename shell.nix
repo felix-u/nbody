@@ -4,18 +4,12 @@
 with pkgs; mkShell {
   nativeBuildInputs = [
     # pkgconfig
-    # clang lld # To use lld linker
+    gcc lld # To use lld linker
     SDL2
   ];
   buildInputs = [
-    # udev alsaLib vulkan-loader
     # xorg.libX11 xorg.libXcursor xorg.libXrandr xorg.libXi # To use x11 feature
     # libxkbcommon wayland # To use wayland feature
     SDL2
   ];
-  shellHook = ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [
-    # udev alsaLib vulkan-loader
-    # libxkbcommon wayland # To use wayland feature
-    SDL2
-  ]}"'';
 }
