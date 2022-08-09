@@ -57,7 +57,6 @@ int main() {
 
         SDL_SetRenderDrawColor(renderer, 144, 48, 160, SDL_ALPHA_OPAQUE);
         SDL_RenderDrawLine(renderer, 320, 200, 320, 240);
-        // SDL_Delay(2000);
 
         SDL_RenderPresent(renderer);
         while (SDL_PollEvent(&event)) {
