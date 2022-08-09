@@ -1,6 +1,9 @@
 # shell.nix
 
 { pkgs ? import <nixpkgs> {} }:
+let
+    pkgs-unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+in
 with pkgs; mkShell {
   nativeBuildInputs = [
     # pkgconfig
@@ -12,6 +15,6 @@ with pkgs; mkShell {
     # To use wayland feature
     # egl-wayland libdecor libxkbcommon wayland wayland-scanner wayland-utils
     # wayland-protocols
-    SDL2
+    pkgs-unstable.SDL2
   ];
 }
