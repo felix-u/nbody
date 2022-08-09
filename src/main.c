@@ -12,15 +12,32 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
+#include <SDL2/SDL_hints.h>
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define LOGICAL_WIDTH 320
 #define LOGICAL_HEIGHT 180
 
+// FIXME
+// obviously I'm doing something here wrong, since the C99 example from
+// https://github.com/xyproto/sdl2-examples works with wayland, and this
+// doesn't
+
+
 int main() {
 
+    SDL_version compiled;
+    SDL_version linked;
+    SDL_VERSION(&compiled);
+    SDL_GetVersion(&linked);
+    printf("We compiled against SDL version %u.%u.%u ...\n",
+           compiled.major, compiled.minor, compiled.patch);
+    printf("But we are linking against SDL version %u.%u.%u.\n",
+           linked.major, linked.minor, linked.patch);
+
     // initialise SDL
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "wayland");
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
             fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
             return EXIT_FAILURE;
@@ -48,7 +65,7 @@ int main() {
 		SDL_Quit();
 		return EXIT_FAILURE;
 	}
-    // SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
     // event loop
     SDL_bool done = SDL_FALSE;
@@ -59,7 +76,7 @@ int main() {
         SDL_RenderClear(renderer);
 
         SDL_SetRenderDrawColor(renderer, 144, 48, 160, SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawLine(renderer, 320, 200, 320, 240);
+        SDL_RenderDrawLine(renderer, 20, 40, 20, 80);
 
         SDL_RenderPresent(renderer);
         while (SDL_PollEvent(&event)) {
