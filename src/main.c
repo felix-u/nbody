@@ -1,6 +1,3 @@
-#include "SDL2/SDL_render.h"
-#include "SDL2/SDL_surface.h"
-#include "SDL2/SDL_video.h"
 #include <stdint.h>
 #include <stdlib.h>
 // exact-width integer types
@@ -9,8 +6,12 @@
 #include <stdio.h>
 // return explicit error codes
 #include <error.h>
+// SDL2, my precious
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_video.h>
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
