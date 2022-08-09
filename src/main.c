@@ -20,6 +20,7 @@
 const uint8_t C_BG[3] = {   0,   0,  32 };
 const uint8_t C_FG[3] = { 144,  48, 160 };
 
+
 int main() {
 
     // initialise SDL
@@ -29,17 +30,15 @@ int main() {
 	}
 
     // create window
-    // NOTE: Using SDL_WINDOWPOS_CENTERED will *VERY STUPIDLY* silently force
-    //       X11 over Wayland, because Wayland doesn't expose window
-    //       positioning functionality to clients. So I'm not using it...
-    //       OBVIOUSLY.
     int32_t window_flags =
         SDL_WINDOW_ALLOW_HIGHDPI |
         SDL_WINDOW_INPUT_FOCUS |
+        // SDL_WINDOW_RESIZABLE | // enable at least this outside test builds
+        // SDL_WINDOW_FULLSCREEN | // if not also this
         SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow(
         "nbody", // title
-        100, 100, // co-ordinates (see note above)
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, // co-ordinates
         SCREEN_WIDTH, SCREEN_HEIGHT, // dimensions
         window_flags
     );
@@ -61,21 +60,28 @@ int main() {
     // render at THIS resolution and scale up to SCREEN
     SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
+    // event loop
     SDL_bool done = SDL_FALSE;
     while (!done) {
         SDL_Event event;
 
+        // draw background
         SDL_SetRenderDrawColor(renderer, C_BG[0], C_BG[1], C_BG[2], SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
+
+        // draw line
         SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
         SDL_RenderDrawLine(renderer, 20, 40, 20, 80);
-		SDL_RenderPresent(renderer);
 
+        // TODO: keyboard input
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 done = SDL_TRUE;
             }
         }
+
+        // render
+		SDL_RenderPresent(renderer);
 	}
 
     if (renderer) SDL_DestroyRenderer(renderer);
