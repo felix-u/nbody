@@ -15,6 +15,8 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
+#define LOGICAL_WIDTH 320
+#define LOGICAL_HEIGHT 180
 
 int main() {
 
@@ -46,6 +48,7 @@ int main() {
 		SDL_Quit();
 		return EXIT_FAILURE;
 	}
+    // SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
     // event loop
     SDL_bool done = SDL_FALSE;
