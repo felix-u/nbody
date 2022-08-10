@@ -12,6 +12,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_video.h>
+#include "./gravity.h"
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
@@ -76,19 +77,24 @@ int main() {
         SDL_Event event;
 
         // draw background
-        SDL_SetRenderDrawColor(renderer, C_BG[0], C_BG[1], C_BG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(
+            renderer,
+            C_BG[0], C_BG[1], C_BG[2],
+            SDL_ALPHA_OPAQUE
+        );
         SDL_RenderClear(renderer);
 
-        // draw line
-        SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
+        // draw points
+        SDL_SetRenderDrawColor(
+            renderer,
+            C_FG[0], C_FG[1], C_FG[2],
+            SDL_ALPHA_OPAQUE
+        );
         for (uint32_t pix = 0; pix < WIDTH*HEIGHT; pix++) {
             if (mass_buf[pix] == 1) {
-                uint_fast16_t x_pos = pix % WIDTH;
-                uint_fast16_t y_pos = pix / WIDTH;
-                SDL_RenderDrawPoint(renderer, x_pos, y_pos);
+                SDL_RenderDrawPoint(renderer, pix % WIDTH, pix / WIDTH);
             }
         }
-        // SDL_RenderDrawLine(renderer, 20, 40, 20, 80);
 
         // TODO: keyboard input
         while (SDL_PollEvent(&event)) {
