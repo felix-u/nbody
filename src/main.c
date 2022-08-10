@@ -15,8 +15,8 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-#define LOGICAL_WIDTH 320
-#define LOGICAL_HEIGHT 180
+#define WIDTH 320
+#define HEIGHT 180
 
 const uint8_t C_BG[3] = {   0,   0,  32 };
 const uint8_t C_FG[3] = { 144,  48, 160 };
@@ -58,8 +58,17 @@ int main() {
 		return EXIT_FAILURE;
 	}
 
-    // render at THIS resolution and scale up to SCREEN
-    SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    // nicer variable names, since we'll be working with them a bit
+    // render at this resolution and scale up to SCREEN
+    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
+
+
+    // buffer holding int for logical pixels, every one of which either holds
+    // a mass or empty space
+    uint_fast8_t mass_buf[WIDTH*HEIGHT] = {0};
+    mass_buf[WIDTH*5 + 5] = 1;
+    mass_buf[WIDTH*10 + 10] = 1;
+
 
     // event loop
     SDL_bool done = SDL_FALSE;
@@ -72,7 +81,14 @@ int main() {
 
         // draw line
         SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawLine(renderer, 20, 40, 20, 80);
+        for (uint32_t pix = 0; pix < WIDTH*HEIGHT; pix++) {
+            if (mass_buf[pix] == 1) {
+                uint_fast16_t x_pos = pix % WIDTH;
+                uint_fast16_t y_pos = pix / WIDTH;
+                SDL_RenderDrawPoint(renderer, x_pos, y_pos);
+            }
+        }
+        // SDL_RenderDrawLine(renderer, 20, 40, 20, 80);
 
         // TODO: keyboard input
         while (SDL_PollEvent(&event)) {
