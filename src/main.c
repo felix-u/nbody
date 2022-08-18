@@ -1,12 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
-// exact-width integer types
-// https://en.wikibooks.org/wiki/C_Programming/inttypes.h
-#include <inttypes.h>
 #include <stdio.h>
-// return explicit error codes
 #include <error.h>
-// SDL2, my precious
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
@@ -35,8 +30,7 @@ int main() {
     int32_t window_flags =
         SDL_WINDOW_ALLOW_HIGHDPI |
         SDL_WINDOW_INPUT_FOCUS |
-        // SDL_WINDOW_RESIZABLE | // enable at least this outside test builds
-        // SDL_WINDOW_FULLSCREEN | // if not also this
+        // SDL_WINDOW_RESIZABLE | // perhaps enable this at some point?
         SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow(
         "nbody", // title
