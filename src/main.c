@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
-#include <inttypes.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <error.h>
 
@@ -9,6 +9,8 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_video.h>
+
+#include "./gravity.c"
 
 #define SCREEN_WIDTH 1600
 #define SCREEN_HEIGHT 900
@@ -33,6 +35,7 @@ int main() {
         SDL_WINDOW_INPUT_FOCUS |
         // SDL_WINDOW_RESIZABLE | // Enable at least this outside test builds
         // SDL_WINDOW_FULLSCREEN | // if not also this
+        // SDL_WINDOW_RESIZABLE | // perhaps enable this at some point?
         SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow(
         // Title
