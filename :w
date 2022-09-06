@@ -14,13 +14,13 @@
 
 #include "./gravity.c"
 
-#define SCREEN_WIDTH 1600.
-#define SCREEN_HEIGHT 900.
-#define LOGICAL_WIDTH 640.
-#define LOGICAL_HEIGHT 360.
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 900
+#define LOGICAL_WIDTH 640
+#define LOGICAL_HEIGHT 360
 
-const float SCALE_X = SCREEN_WIDTH / LOGICAL_WIDTH;
-const float SCALE_Y = SCREEN_HEIGHT / LOGICAL_HEIGHT;
+const int X_SCALE = SCREEN_WIDTH / LOGICAL_WIDTH;
+const int Y_SCALE = SCREEN_HEIGHT / LOGICAL_HEIGHT;
 
 const uint8_t C_BG[3] = {  20,  31,  64 };
 const uint8_t C_FG[3] = { 202, 193, 251 };
@@ -69,18 +69,16 @@ int main() {
     // Render at THIS resolution and scale up to SCREEN
     SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
-    // int SCREEN_X, SCREEN_Y;
-    // SDL_GetWindowSize(window, &SCREEN_X, &SCREEN_Y);
-    // SDL_Log("%d by %d\n", SCREEN_X, SCREEN_Y);
-    // SDL_Log("Scaled by %0.2f x %0.2f\n", SCALE_X, SCALE_Y);
+    int SCREEN_X, SCREEN_Y;
+    SDL_GetWindowSize(window, &SCREEN_X, &SCREEN_Y);
+    SDL_Log("%d by %d\n", SCREEN_X, SCREEN_Y);
 
     // GAME SETUP
 
-    int mouse_x = 0, mouse_y = 0, win_x = 0, win_y = 0;
+    int mouse_x = 0, mouse_y = 0;
     uint32_t mouse_buttons = 0, last_frame_mouse_buttons = 0;
 
-    const int body_num_max = 10;
-    Body bodies[body_num_max];
+    Body bodies[100];
     int body_num = 1;
 
     Body default_body = {
@@ -93,7 +91,6 @@ int main() {
     };
     bodies[0] = default_body;
 
-    int cursor_radius = 2;
 
     // EVENT LOOP
 
@@ -109,10 +106,7 @@ int main() {
         SDL_PumpEvents();
 
         mouse_buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
-        win_x = mouse_x / SCALE_X;
-        win_y = mouse_y / SCALE_Y;
-
-        // SDL_Log("Mouse cursor is at %d, %d, %d\n", mouse_x, mouse_y, mouse_buttons);
+        SDL_Log("Mouse cursor is at %d, %d, %d\n", mouse_x, mouse_y, mouse_buttons);
         // if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
         //     SDL_Log("Click!\n");
         // }
@@ -132,34 +126,35 @@ int main() {
         // Draw cursor
         SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
         SDL_Rect cursor = {
-            win_x - cursor_radius,
-            win_y - cursor_radius,
-            cursor_radius * 2,
-            cursor_radius * 2
+            // mouse_x - 2, mouse_y - 2, 4, 4
+            (mouse_x / X_SCALE) - 2, (mouse_y / Y_SCALE) - 2, 4, 4
         };
         SDL_RenderDrawRect(renderer, &cursor);
 
         // Add body on left click
         SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
         if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
-            if (body_num < body_num_max) {
+            // const SDL_Rect new_body = {
+            //     mouse_x - 2, mouse_y - 2, 4, 4
+            // };
+            if (body_num < 100) {
                 Body new_body = {
-                    win_x - cursor_radius + 1,
-                    win_y - cursor_radius + 1,
+                    mouse_x,
+                    mouse_y,
                     0.0,
                     0.0,
-                    cursor_radius,
-                    cursor_radius * cursor_radius * cursor_radius * 4.0 / 3.0,
+                    5,
+                    5 * 5 * 5 * 4.0 / 3.0,
                 };
                 bodies[body_num] = new_body;
                 body_num++;
             }
-            else SDL_Log("Reached max number of bodies: %d\n", body_num);
         }
 
-        // Let user exit
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) done = SDL_TRUE;
+            if (event.type == SDL_QUIT) {
+                done = SDL_TRUE;
+            }
         }
 
         // Render

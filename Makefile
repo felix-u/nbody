@@ -3,7 +3,7 @@ DEBUGFLAGS=-g -Og
 RELEASEFLAGS=-O3
 LIBS=-lSDL2
 
-nbody: src/main.c
+nbody: src/*
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(LIBS) -o nbody src/main.c
 
 release: src/*
