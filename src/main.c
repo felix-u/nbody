@@ -14,6 +14,8 @@
 
 #include "./gravity.c"
 
+#define PI 3.142857
+
 #define SCREEN_WIDTH 1600.
 #define SCREEN_HEIGHT 900.
 #define LOGICAL_WIDTH 640.
@@ -89,7 +91,7 @@ int main() {
         0.0,                    // vel_x
         0.0,                    // vel_y
         5,                      // radius
-        5 * 5 * 5 * 4.0 / 3.0,  // mass
+        5 * 5 * 5 * (4.0 / 3.0) * PI,  // mass
     };
     bodies[0] = default_body;
 
@@ -151,7 +153,7 @@ int main() {
                     0.0,
                     0.0,
                     cursor_radius * 2,
-                    cursor_radius * cursor_radius * cursor_radius * 4.0 / 3.0,
+                    cursor_radius * cursor_radius * cursor_radius * (4.0 / 3.0) * PI,
                 };
                 bodies[body_num] = new_body;
                 body_num++;
