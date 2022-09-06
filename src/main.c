@@ -79,7 +79,7 @@ int main() {
     int mouse_x = 0, mouse_y = 0, win_x = 0, win_y = 0;
     uint32_t mouse_buttons = 0, last_frame_mouse_buttons = 0;
 
-    const int body_num_max = 10;
+    const int body_num_max = 100;
     Body bodies[body_num_max];
     int body_num = 1;
 
@@ -94,6 +94,8 @@ int main() {
     bodies[0] = default_body;
 
     int cursor_radius = 2;
+    const int cursor_radius_max = 20;
+    const int cursor_radius_min = 1;
 
     // EVENT LOOP
 
@@ -144,11 +146,11 @@ int main() {
         if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
             if (body_num < body_num_max) {
                 Body new_body = {
-                    win_x - cursor_radius + 1,
-                    win_y - cursor_radius + 1,
+                    win_x - cursor_radius,
+                    win_y - cursor_radius,
                     0.0,
                     0.0,
-                    cursor_radius,
+                    cursor_radius * 2,
                     cursor_radius * cursor_radius * cursor_radius * 4.0 / 3.0,
                 };
                 bodies[body_num] = new_body;
@@ -157,9 +159,20 @@ int main() {
             else SDL_Log("Reached max number of bodies: %d\n", body_num);
         }
 
-        // Let user exit
         while (SDL_PollEvent(&event)) {
+
+            // Let user exit
             if (event.type == SDL_QUIT) done = SDL_TRUE;
+
+            // Modify size of cursor on scroll
+            if (event.type == SDL_MOUSEWHEEL) {
+                if (event.wheel.y > 0 && cursor_radius < cursor_radius_max) {
+                    cursor_radius += 1;
+                }
+                else if (event.wheel.y < 0 && cursor_radius > cursor_radius_min) {
+                    cursor_radius -= 1;
+                }
+            }
         }
 
         // Render
