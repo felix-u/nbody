@@ -24,8 +24,8 @@
 const float SCALE_X = SCREEN_WIDTH / LOGICAL_WIDTH;
 const float SCALE_Y = SCREEN_HEIGHT / LOGICAL_HEIGHT;
 
-const uint8_t C_BG[3] = {  20,  31,  64 };
-const uint8_t C_FG[3] = { 202, 193, 251 };
+const uint8_t CLR_BG[3] = {  20,  31,  64 };
+const uint8_t CLR_FG[3] = { 202, 193, 251 };
 
 
 int main() {
@@ -70,10 +70,6 @@ int main() {
     // Render at THIS resolution and scale up to SCREEN
     SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
-    // int SCREEN_X, SCREEN_Y;
-    // SDL_GetWindowSize(window, &SCREEN_X, &SCREEN_Y);
-    // SDL_Log("%d by %d\n", SCREEN_X, SCREEN_Y);
-    // SDL_Log("Scaled by %0.2f x %0.2f\n", SCALE_X, SCALE_Y);
 
     // GAME SETUP
 
@@ -84,19 +80,21 @@ int main() {
     Body bodies[body_num_max];
     int body_num = 1;
 
+    int cursor_radius = 2;
+    const int cursor_radius_max = 20;
+    const int cursor_radius_min = 1;
+
+    const int default_body_radius = cursor_radius_max * 2;
     Body default_body = {
         LOGICAL_WIDTH / 2.0,    // pos_x
         LOGICAL_HEIGHT / 2.0,   // pos_y
         0.0,                    // vel_x
         0.0,                    // vel_y
-        5,                      // radius
-        5 * 5 * 5 * (4.0 / 3.0) * PI,  // mass
+        default_body_radius,    // radius
+        default_body_radius * default_body_radius * default_body_radius * (4.0 / 3.0) * PI,  // mass
     };
     bodies[0] = default_body;
 
-    int cursor_radius = 2;
-    const int cursor_radius_max = 20;
-    const int cursor_radius_min = 1;
 
     // EVENT LOOP
 
@@ -105,7 +103,7 @@ int main() {
         SDL_Event event;
 
         // Draw background
-        SDL_SetRenderDrawColor(renderer, C_BG[0], C_BG[1], C_BG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR_BG[0], CLR_BG[1], CLR_BG[2], SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
         // Make sure we have the latest mouse state
@@ -121,19 +119,19 @@ int main() {
         // }
 
         // Draw bodies
-        SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
         for (int i = 0; i < body_num; i++) {
             const SDL_Rect body = {
-                bodies[i].pos_x,
-                bodies[i].pos_y,
-                bodies[i].radius,
-                bodies[i].radius
+                bodies[i].pos_x - bodies[i].radius,
+                bodies[i].pos_y - bodies[i].radius,
+                bodies[i].radius * 2,
+                bodies[i].radius * 2
             };
             SDL_RenderFillRect(renderer, &body);
         }
 
         // Draw cursor
-        SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
         SDL_Rect cursor = {
             win_x - cursor_radius,
             win_y - cursor_radius,
@@ -143,15 +141,13 @@ int main() {
         SDL_RenderDrawRect(renderer, &cursor);
 
         // Add body on left click
-        SDL_SetRenderDrawColor(renderer, C_FG[0], C_FG[1], C_FG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
         if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
             if (body_num < body_num_max) {
                 Body new_body = {
-                    win_x - cursor_radius,
-                    win_y - cursor_radius,
-                    0.0,
-                    0.0,
-                    cursor_radius * 2,
+                    win_x, win_y,
+                    0.0, 0.0,
+                    cursor_radius,
                     cursor_radius * cursor_radius * cursor_radius * (4.0 / 3.0) * PI,
                 };
                 bodies[body_num] = new_body;
