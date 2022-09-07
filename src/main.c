@@ -85,11 +85,12 @@ int main() {
     const int cursor_radius_max = 20;
     const int cursor_radius_min = 1;
 
-    const int default_body_radius = cursor_radius_max * 2;
+    // const int default_body_radius = cursor_radius_max * 2;
+    const int default_body_radius = 2;
     Body default_body = {
         LOGICAL_WIDTH / 2.0,    // pos_x
         LOGICAL_HEIGHT / 2.0,   // pos_y
-        0.0,                    // vel_x
+        1.0,                    // vel_x
         0.0,                    // vel_y
         default_body_radius,    // radius
         default_body_radius * default_body_radius * default_body_radius * (4.0 / 3.0) * PI,  // mass
@@ -117,6 +118,12 @@ int main() {
         // Draw bodies
         SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
         for (int i = 0; i < body_num; i++) {
+
+            // Increment position by velocity
+            bodies[i].pos_x += bodies[i].vel_x;
+            bodies[i].pos_y += bodies[i].vel_y;
+
+            // Render body
             const SDL_Rect body = {
                 bodies[i].pos_x - bodies[i].radius,
                 bodies[i].pos_y - bodies[i].radius,
@@ -155,15 +162,30 @@ int main() {
         // Calculate gravity
         for (int body = 0; body < body_num; body++) {
             for (int body_cmp = body + 1; body_cmp < body_num; body_cmp++) {
-                double distance = sqrt(
-                    pow(bodies[body].pos_x - bodies[body_cmp].pos_x, 2) +
-                    pow(bodies[body].pos_y - bodies[body_cmp].pos_y, 2)
-                );
-                SDL_Log("Body %d and %d at separation %0.2f are pulling on each other with %0.2f N\n",
-                        body, body_cmp, distance, forceBetween(distance, bodies[body].mass, bodies[body_cmp].mass));
+
+                // @Speed I'm sure there are obvious optimisations I could do here @Speed
+
+                double dist_x = bodies[body_cmp].pos_x - bodies[body].pos_x;
+                double dist_y = bodies[body_cmp].pos_y - bodies[body].pos_y;
+                double dist = sqrt((dist_x * dist_x) + (dist_y * dist_y));
+                double angle = atan2(dist_y, dist_x);
+
+                double force = forceBetween(dist, bodies[body].mass, bodies[body_cmp].mass);
+                double body_accel = force / bodies[body].mass;
+                double body_cmp_accel = force / bodies[body_cmp].mass;
+                double body_accel_x = body_accel * (dist_x / dist);
+                double body_accel_y = body_accel * (dist_y / dist);
+                double body_cmp_accel_x = body_cmp_accel * (dist_x / dist) * -1;
+                double body_cmp_accel_y = body_cmp_accel * (dist_y / dist) * -1;
+
+                bodies[body].vel_x += body_accel_x;
+                bodies[body].vel_y += body_accel_y;
+                bodies[body_cmp].vel_x += body_cmp_accel_x;
+                bodies[body_cmp].vel_y += body_cmp_accel_y;
+
+                SDL_Log("Body %d and %d are separated at angle %0.2f\n", body, body_cmp, angle);
 
 
-                // @Missing Apply gravitation force @Missing
             }
         }
 

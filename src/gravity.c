@@ -2,8 +2,8 @@
 typedef float  f32;
 typedef double f64;
 
-// G is scaled by 10**10
-#define SCALED_G_CONST 0.6674
+// G is scaled by 10**8
+#define SCALED_G_CONST 0.006674
 
 typedef struct {
     f64 pos_x;
