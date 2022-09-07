@@ -79,23 +79,23 @@ int main() {
 
     const int body_num_max = 100;
     Body bodies[body_num_max];
-    int body_num = 1;
+    int body_num = 0;
 
     int cursor_radius = 2;
     const int cursor_radius_max = 20;
     const int cursor_radius_min = 1;
 
-    // const int default_body_radius = cursor_radius_max * 2;
-    const int default_body_radius = 2;
-    Body default_body = {
-        LOGICAL_WIDTH / 2.0,    // pos_x
-        LOGICAL_HEIGHT / 2.0,   // pos_y
-        1.0,                    // vel_x
-        0.0,                    // vel_y
-        default_body_radius,    // radius
-        default_body_radius * default_body_radius * default_body_radius * (4.0 / 3.0) * PI,  // mass
-    };
-    bodies[0] = default_body;
+    // // const int default_body_radius = cursor_radius_max * 2;
+    // const int default_body_radius = 2;
+    // Body default_body = {
+    //     LOGICAL_WIDTH / 2.0,    // pos_x
+    //     LOGICAL_HEIGHT / 2.0,   // pos_y
+    //     1.0,                    // vel_x
+    //     0.0,                    // vel_y
+    //     default_body_radius,    // radius
+    //     default_body_radius * default_body_radius * default_body_radius * (4.0 / 3.0) * PI,  // mass
+    // };
+    // bodies[0] = default_body;
 
 
     // EVENT LOOP
@@ -168,22 +168,29 @@ int main() {
                 double dist_x = bodies[body_cmp].pos_x - bodies[body].pos_x;
                 double dist_y = bodies[body_cmp].pos_y - bodies[body].pos_y;
                 double dist = sqrt((dist_x * dist_x) + (dist_y * dist_y));
-                double angle = atan2(dist_y, dist_x);
 
-                double force = forceBetween(dist, bodies[body].mass, bodies[body_cmp].mass);
-                double body_accel = force / bodies[body].mass;
-                double body_cmp_accel = force / bodies[body_cmp].mass;
-                double body_accel_x = body_accel * (dist_x / dist);
-                double body_accel_y = body_accel * (dist_y / dist);
-                double body_cmp_accel_x = body_cmp_accel * (dist_x / dist) * -1;
-                double body_cmp_accel_y = body_cmp_accel * (dist_y / dist) * -1;
+                // @Missing Odd behaviour at close encounters. Consider implementing collisions and having the larger
+                // body "eat" the smaller one upon impact @Missing
 
-                bodies[body].vel_x += body_accel_x;
-                bodies[body].vel_y += body_accel_y;
-                bodies[body_cmp].vel_x += body_cmp_accel_x;
-                bodies[body_cmp].vel_y += body_cmp_accel_y;
+                if (dist >= 10) {
+                    // double angle = atan2(dist_y, dist_x);
 
-                SDL_Log("Body %d and %d are separated at angle %0.2f\n", body, body_cmp, angle);
+                    double force = forceBetween(dist, bodies[body].mass, bodies[body_cmp].mass);
+                    double body_accel = force / bodies[body].mass;
+                    double body_cmp_accel = force / bodies[body_cmp].mass;
+                    double body_accel_x = body_accel * (dist_x / dist);
+                    double body_accel_y = body_accel * (dist_y / dist);
+                    double body_cmp_accel_x = body_cmp_accel * (dist_x / dist) * -1;
+                    double body_cmp_accel_y = body_cmp_accel * (dist_y / dist) * -1;
+
+                    bodies[body].vel_x += body_accel_x;
+                    bodies[body].vel_y += body_accel_y;
+                    bodies[body_cmp].vel_x += body_cmp_accel_x;
+                    bodies[body_cmp].vel_y += body_cmp_accel_y;
+
+                    // SDL_Log("Body %d and %d are separated at angle %0.2f\n", body, body_cmp, angle);
+                }
+
 
 
             }
