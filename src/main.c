@@ -42,7 +42,6 @@ int main() {
         SDL_WINDOW_INPUT_FOCUS |
         // SDL_WINDOW_RESIZABLE | // Enable at least this outside test builds
         // SDL_WINDOW_FULLSCREEN | // if not also this
-        // SDL_WINDOW_RESIZABLE | // perhaps enable this at some point?
         SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow(
         // Title
