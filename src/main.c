@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <error.h>
+#include <math.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
@@ -113,11 +114,6 @@ int main() {
         win_x = mouse_x / SCALE_X;
         win_y = mouse_y / SCALE_Y;
 
-        // SDL_Log("Mouse cursor is at %d, %d, %d\n", mouse_x, mouse_y, mouse_buttons);
-        // if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
-        //     SDL_Log("Click!\n");
-        // }
-
         // Draw bodies
         SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
         for (int i = 0; i < body_num; i++) {
@@ -154,6 +150,21 @@ int main() {
                 body_num++;
             }
             else SDL_Log("Reached max number of bodies: %d\n", body_num);
+        }
+
+        // Calculate gravity
+        for (int body = 0; body < body_num; body++) {
+            for (int body_cmp = body + 1; body_cmp < body_num; body_cmp++) {
+                double distance = sqrt(
+                    pow(bodies[body].pos_x - bodies[body_cmp].pos_x, 2) +
+                    pow(bodies[body].pos_y - bodies[body_cmp].pos_y, 2)
+                );
+                SDL_Log("Body %d and %d at separation %0.2f are pulling on each other with %0.2f N\n",
+                        body, body_cmp, distance, forceBetween(distance, bodies[body].mass, bodies[body_cmp].mass));
+
+
+                // @Missing Apply gravitation force @Missing
+            }
         }
 
         while (SDL_PollEvent(&event)) {
