@@ -26,9 +26,14 @@
 const float SCALE_X = SCREEN_WIDTH / LOGICAL_WIDTH;
 const float SCALE_Y = SCREEN_HEIGHT / LOGICAL_HEIGHT;
 
-const uint8_t CLR_BG[3] = {  20,  31,  64 };
-const uint8_t CLR_05[3] = { 198, 131, 211 };
-const uint8_t CLR_FG[3] = { 202, 193, 251 };
+const RGB CLR_BG     = {  20,  31,  64 };
+const RGB CLR_BLUE   = {  93, 161, 224 };
+const RGB CLR_PURPLE = { 126, 112, 205 };
+const RGB CLR_PINK   = { 198, 131, 211 };
+const RGB CLR_RED    = { 198,  93, 130 };
+const RGB CLR_ORANGE = { 220, 169, 123 };
+const RGB CLR_YELLOW = { 205, 172, 112 };
+const RGB CLR_FG     = { 202, 193, 251 };
 
 int drawCircle(SDL_Renderer *renderer, int x0, int y0, int radius);
 int fillCircle(SDL_Renderer *renderer, int x, int y, int radius);
@@ -90,7 +95,7 @@ int main() {
 
     int cursor_radius = 2;
     const int cursor_radius_max = 20;
-    const int cursor_radius_min = 1;
+    const int cursor_radius_min = 2;
 
     // // const int default_body_radius = cursor_radius_max * 2;
     // const int default_body_radius = 2;
@@ -120,7 +125,7 @@ int main() {
         SDL_Event event;
 
         // Draw background
-        SDL_SetRenderDrawColor(renderer, CLR_BG[0], CLR_BG[1], CLR_BG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR_BG.r, CLR_BG.g, CLR_BG.b, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
         // Make sure we have the latest mouse state
@@ -130,19 +135,27 @@ int main() {
         win_x = mouse_x / SCALE_X;
         win_y = mouse_y / SCALE_Y;
 
-        // Draw cursor
-        SDL_SetRenderDrawColor(renderer, CLR_05[0], CLR_05[1], CLR_05[2], SDL_ALPHA_OPAQUE);
-        drawCircle(renderer, win_x, win_y, cursor_radius);
-
         // Add body on left click
-        SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR_FG.r, CLR_FG.g, CLR_FG.b, SDL_ALPHA_OPAQUE);
         if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
             if (body_num < body_num_max) {
+
+                const RGB *clr = &CLR_FG;
+                float clr_index = ((float)cursor_radius / (float)cursor_radius_max) * 100.0;
+                if (clr_index < 25) clr = &CLR_BLUE;
+                else if (clr_index < 50) clr = &CLR_PURPLE;
+                else if (clr_index < 70) clr = &CLR_RED;
+                else if (clr_index < 90) clr = &CLR_ORANGE;
+                else clr = &CLR_YELLOW;
+
+                int rad = cursor_radius - 1;
+
                 Body new_body = {
                     win_x, win_y,
                     0.0, 0.0,
-                    cursor_radius,
-                    cursor_radius * cursor_radius * cursor_radius * (4.0 / 3.0) * PI,
+                    rad,
+                    rad * rad * rad * (4.0 / 3.0) * PI,
+                    *clr
                 };
                 bodies[body_num] = new_body;
                 body_num++;
@@ -163,9 +176,8 @@ int main() {
                 // @Missing Odd behaviour at close encounters. Consider implementing collisions and having the larger
                 // body "eat" the smaller one upon impact @Missing
 
-                if (dist >= 10) {
-
-                    double force = forceBetween(dist, bodies[i].mass, bodies[cmp].mass);
+                if (dist >= (bodies[i].radius + bodies[cmp].radius) / 2.0) {
+                    double force = forceBetween(dist, bodies[i].mass, bodies[cmp].mass) * delta * TIMESCALE;
                     double body_accel = force / bodies[i].mass;
                     double body_cmp_accel = force / bodies[cmp].mass;
                     double body_accel_x = body_accel * (dist_x / dist);
@@ -177,15 +189,12 @@ int main() {
                     bodies[i].vel_y += body_accel_y;
                     bodies[cmp].vel_x += body_cmp_accel_x;
                     bodies[cmp].vel_y += body_cmp_accel_y;
-
-                    // SDL_Log("Body %d and %d are separated at angle %0.2f\n", body, body_cmp, angle);
                 }
-
             }
 
             // Increment position by velocity
-            bodies[i].pos_x += bodies[i].vel_x * delta * TIMESCALE;
-            bodies[i].pos_y += bodies[i].vel_y * delta * TIMESCALE;
+            bodies[i].pos_x += bodies[i].vel_x;
+            bodies[i].pos_y += bodies[i].vel_y;
 
             // Bound to screenspace
             if (bodies[i].pos_x <= bodies[i].radius) {
@@ -206,10 +215,15 @@ int main() {
             }
 
             // Draw bodies
-            SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
+            SDL_SetRenderDrawColor(renderer, bodies[i].clr.r, bodies[i].clr.g, bodies[i].clr.b, SDL_ALPHA_OPAQUE);
             fillCircle(renderer, bodies[i].pos_x, bodies[i].pos_y, bodies[i].radius);
 
         }
+
+        // Draw cursor
+        SDL_SetRenderDrawColor(renderer, CLR_PINK.r, CLR_PINK.g, CLR_PINK.r, SDL_ALPHA_OPAQUE);
+        drawCircle(renderer, win_x, win_y, cursor_radius);
+
 
         while (SDL_PollEvent(&event)) {
 
