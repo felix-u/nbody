@@ -2,7 +2,7 @@
 typedef float  f32;
 typedef double f64;
 
-// Our G is G * 10**9 * 2
+// Our G is G * 10**8 * 2
 #define SCALED_G_CONST (0.006674*2)
 
 typedef struct {
