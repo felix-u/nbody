@@ -27,7 +27,13 @@ const float SCALE_X = SCREEN_WIDTH / LOGICAL_WIDTH;
 const float SCALE_Y = SCREEN_HEIGHT / LOGICAL_HEIGHT;
 
 const uint8_t CLR_BG[3] = {  20,  31,  64 };
+const uint8_t CLR_05[3] = { 198, 131, 211 };
 const uint8_t CLR_FG[3] = { 202, 193, 251 };
+
+int drawCircle(SDL_Renderer *renderer, int x0, int y0, int radius);
+int fillCircle(SDL_Renderer *renderer, int x, int y, int radius);
+
+#define TIMESCALE 3;
 
 
 int main() {
@@ -125,14 +131,8 @@ int main() {
         win_y = mouse_y / SCALE_Y;
 
         // Draw cursor
-        SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
-        SDL_Rect cursor = {
-            win_x - cursor_radius,
-            win_y - cursor_radius,
-            cursor_radius * 2,
-            cursor_radius * 2
-        };
-        SDL_RenderDrawRect(renderer, &cursor);
+        SDL_SetRenderDrawColor(renderer, CLR_05[0], CLR_05[1], CLR_05[2], SDL_ALPHA_OPAQUE);
+        drawCircle(renderer, win_x, win_y, cursor_radius);
 
         // Add body on left click
         SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
@@ -164,7 +164,6 @@ int main() {
                 // body "eat" the smaller one upon impact @Missing
 
                 if (dist >= 10) {
-                    // double angle = atan2(dist_y, dist_x);
 
                     double force = forceBetween(dist, bodies[i].mass, bodies[cmp].mass);
                     double body_accel = force / bodies[i].mass;
@@ -185,8 +184,8 @@ int main() {
             }
 
             // Increment position by velocity
-            bodies[i].pos_x += bodies[i].vel_x * delta;
-            bodies[i].pos_y += bodies[i].vel_y * delta;
+            bodies[i].pos_x += bodies[i].vel_x * delta * TIMESCALE;
+            bodies[i].pos_y += bodies[i].vel_y * delta * TIMESCALE;
 
             // Bound to screenspace
             if (bodies[i].pos_x <= bodies[i].radius) {
@@ -208,13 +207,7 @@ int main() {
 
             // Draw bodies
             SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
-            const SDL_Rect rendered_body = {
-                bodies[i].pos_x - bodies[i].radius,
-                bodies[i].pos_y - bodies[i].radius,
-                bodies[i].radius * 2,
-                bodies[i].radius * 2
-            };
-            SDL_RenderFillRect(renderer, &rendered_body);
+            fillCircle(renderer, bodies[i].pos_x, bodies[i].pos_y, bodies[i].radius);
 
         }
 
@@ -245,4 +238,89 @@ int main() {
 	if (window) SDL_DestroyWindow(window);
 	SDL_Quit();
 	return EXIT_SUCCESS;
+}
+
+
+// Midpoint circle algorithm
+
+int drawCircle(SDL_Renderer *renderer, int x0, int y0, int radius) {
+    int x, y, d;
+    int err;
+
+    x = 0;
+    y = radius;
+    d = radius - 1;
+    err = 0;
+
+    while (y >= x) {
+        err += SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);
+        err += SDL_RenderDrawPoint(renderer, x0 + y, y0 + x);
+        err += SDL_RenderDrawPoint(renderer, x0 - x, y0 + y);
+        err += SDL_RenderDrawPoint(renderer, x0 - y, y0 + x);
+        err += SDL_RenderDrawPoint(renderer, x0 + x, y0 - y);
+        err += SDL_RenderDrawPoint(renderer, x0 + y, y0 - x);
+        err += SDL_RenderDrawPoint(renderer, x0 - x, y0 - y);
+        err += SDL_RenderDrawPoint(renderer, x0 - y, y0 - x);
+
+        if (err < 0) {
+            err = -1;
+            break;
+        }
+
+        if (d >= 2*x) {
+            d -= 2*x + 1;
+            x +=1;
+        }
+        else if (d < 2 * (radius - y)) {
+            d += 2 * y - 1;
+            y -= 1;
+        }
+        else {
+            d += 2 * (y - x - 1);
+            y -= 1;
+            x += 1;
+        }
+    }
+
+    return err;
+}
+
+
+int fillCircle(SDL_Renderer *renderer, int x, int y, int radius) {
+    int x_offset, y_offset, d;
+    int err;
+
+    x_offset = 0;
+    y_offset = radius;
+    d = radius -1;
+    err = 0;
+
+    while (y_offset >= x_offset) {
+
+        err += SDL_RenderDrawLine(renderer, x - y_offset, y + x_offset, x + y_offset, y + x_offset);
+        err += SDL_RenderDrawLine(renderer, x - x_offset, y + y_offset, x + x_offset, y + y_offset);
+        err += SDL_RenderDrawLine(renderer, x - x_offset, y - y_offset, x + x_offset, y - y_offset);
+        err += SDL_RenderDrawLine(renderer, x - y_offset, y - x_offset, x + y_offset, y - x_offset);
+
+        if (err < 0) {
+            err = -1;
+            break;
+        }
+
+        if (d >= 2*x_offset) {
+            d -= 2*x_offset + 1;
+            x_offset +=1;
+        }
+        else if (d < 2 * (radius - y_offset)) {
+            d += 2 * y_offset - 1;
+            y_offset -= 1;
+        }
+        else {
+            d += 2 * (y_offset - x_offset - 1);
+            y_offset -= 1;
+            x_offset += 1;
+        }
+    }
+
+    return err;
 }
