@@ -12,9 +12,9 @@
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_log.h>
 #include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_timer.h>
 
 #include "./gravity.c"
-#include "SDL2/SDL_timer.h"
 
 #define PI 3.142857
 
