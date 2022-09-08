@@ -14,6 +14,7 @@
 #include <SDL2/SDL_mouse.h>
 
 #include "./gravity.c"
+#include "SDL2/SDL_timer.h"
 
 #define PI 3.142857
 
@@ -101,7 +102,15 @@ int main() {
     // EVENT LOOP
 
     SDL_bool done = SDL_FALSE;
+    int NOW = SDL_GetPerformanceCounter();
+    int LAST = 0;
+    double delta = 0;
     while (!done) {
+
+        LAST = NOW;
+        NOW = SDL_GetPerformanceCounter();
+        delta = (double)((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency()) * -1;
+
         SDL_Event event;
 
         // Draw background
@@ -114,24 +123,6 @@ int main() {
         mouse_buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
         win_x = mouse_x / SCALE_X;
         win_y = mouse_y / SCALE_Y;
-
-        // Draw bodies
-        SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
-        for (int i = 0; i < body_num; i++) {
-
-            // Increment position by velocity
-            bodies[i].pos_x += bodies[i].vel_x;
-            bodies[i].pos_y += bodies[i].vel_y;
-
-            // Render body
-            const SDL_Rect body = {
-                bodies[i].pos_x - bodies[i].radius,
-                bodies[i].pos_y - bodies[i].radius,
-                bodies[i].radius * 2,
-                bodies[i].radius * 2
-            };
-            SDL_RenderFillRect(renderer, &body);
-        }
 
         // Draw cursor
         SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
@@ -160,13 +151,13 @@ int main() {
         }
 
         // Calculate gravity
-        for (int body = 0; body < body_num; body++) {
-            for (int body_cmp = body + 1; body_cmp < body_num; body_cmp++) {
+        for (int i = 0; i < body_num; i++) {
+            for (int cmp = i + 1; cmp < body_num; cmp++) {
 
                 // @Speed I'm sure there are obvious optimisations I could do here @Speed
 
-                double dist_x = bodies[body_cmp].pos_x - bodies[body].pos_x;
-                double dist_y = bodies[body_cmp].pos_y - bodies[body].pos_y;
+                double dist_x = bodies[cmp].pos_x - bodies[i].pos_x;
+                double dist_y = bodies[cmp].pos_y - bodies[i].pos_y;
                 double dist = sqrt((dist_x * dist_x) + (dist_y * dist_y));
 
                 // @Missing Odd behaviour at close encounters. Consider implementing collisions and having the larger
@@ -175,25 +166,56 @@ int main() {
                 if (dist >= 10) {
                     // double angle = atan2(dist_y, dist_x);
 
-                    double force = forceBetween(dist, bodies[body].mass, bodies[body_cmp].mass);
-                    double body_accel = force / bodies[body].mass;
-                    double body_cmp_accel = force / bodies[body_cmp].mass;
+                    double force = forceBetween(dist, bodies[i].mass, bodies[cmp].mass);
+                    double body_accel = force / bodies[i].mass;
+                    double body_cmp_accel = force / bodies[cmp].mass;
                     double body_accel_x = body_accel * (dist_x / dist);
                     double body_accel_y = body_accel * (dist_y / dist);
                     double body_cmp_accel_x = body_cmp_accel * (dist_x / dist) * -1;
                     double body_cmp_accel_y = body_cmp_accel * (dist_y / dist) * -1;
 
-                    bodies[body].vel_x += body_accel_x;
-                    bodies[body].vel_y += body_accel_y;
-                    bodies[body_cmp].vel_x += body_cmp_accel_x;
-                    bodies[body_cmp].vel_y += body_cmp_accel_y;
+                    bodies[i].vel_x += body_accel_x;
+                    bodies[i].vel_y += body_accel_y;
+                    bodies[cmp].vel_x += body_cmp_accel_x;
+                    bodies[cmp].vel_y += body_cmp_accel_y;
 
                     // SDL_Log("Body %d and %d are separated at angle %0.2f\n", body, body_cmp, angle);
                 }
 
-
-
             }
+
+            // Increment position by velocity
+            bodies[i].pos_x += bodies[i].vel_x * delta;
+            bodies[i].pos_y += bodies[i].vel_y * delta;
+
+            // Bound to screenspace
+            if (bodies[i].pos_x <= bodies[i].radius) {
+                bodies[i].pos_x = bodies[i].radius;
+                bodies[i].vel_x = 0 - bodies[i].vel_x;
+            }
+            else if (bodies[i].pos_x >= (LOGICAL_WIDTH - bodies[i].radius)) {
+                bodies[i].pos_x = LOGICAL_WIDTH - bodies[i].radius;
+                bodies[i].vel_x = 0 - bodies[i].vel_x;
+            }
+            if (bodies[i].pos_y <= bodies[i].radius) {
+                bodies[i].pos_y = bodies[i].radius;
+                bodies[i].vel_y = 0 - bodies[i].vel_y;
+            }
+            else if (bodies[i].pos_y >= (LOGICAL_HEIGHT - bodies[i].radius)) {
+                bodies[i].pos_y = LOGICAL_HEIGHT - bodies[i].radius;
+                bodies[i].vel_y = 0 - bodies[i].vel_y;
+            }
+
+            // Draw bodies
+            SDL_SetRenderDrawColor(renderer, CLR_FG[0], CLR_FG[1], CLR_FG[2], SDL_ALPHA_OPAQUE);
+            const SDL_Rect rendered_body = {
+                bodies[i].pos_x - bodies[i].radius,
+                bodies[i].pos_y - bodies[i].radius,
+                bodies[i].radius * 2,
+                bodies[i].radius * 2
+            };
+            SDL_RenderFillRect(renderer, &rendered_body);
+
         }
 
         while (SDL_PollEvent(&event)) {
