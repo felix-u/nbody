@@ -97,6 +97,8 @@ int main() {
     const int cursor_radius_max = 20;
     const int cursor_radius_min = 2;
 
+    SDL_ShowCursor(SDL_DISABLE);
+
     // // const int default_body_radius = cursor_radius_max * 2;
     // const int default_body_radius = 2;
     // Body default_body = {
