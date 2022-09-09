@@ -198,22 +198,22 @@ int main() {
             bodies[i].pos_x += bodies[i].vel_x;
             bodies[i].pos_y += bodies[i].vel_y;
 
-            // Bound to screenspace
+            // Bound to screenspace by "reflecting" on collision - with dampening!
             if (bodies[i].pos_x <= bodies[i].radius) {
                 bodies[i].pos_x = bodies[i].radius;
-                bodies[i].vel_x = 0 - bodies[i].vel_x;
+                bodies[i].vel_x = 0 - bodies[i].vel_x / 4;
             }
             else if (bodies[i].pos_x >= (LOGICAL_WIDTH - bodies[i].radius)) {
                 bodies[i].pos_x = LOGICAL_WIDTH - bodies[i].radius;
-                bodies[i].vel_x = 0 - bodies[i].vel_x;
+                bodies[i].vel_x = 0 - bodies[i].vel_x / 4;
             }
             if (bodies[i].pos_y <= bodies[i].radius) {
                 bodies[i].pos_y = bodies[i].radius;
-                bodies[i].vel_y = 0 - bodies[i].vel_y;
+                bodies[i].vel_y = 0 - bodies[i].vel_y / 4;
             }
             else if (bodies[i].pos_y >= (LOGICAL_HEIGHT - bodies[i].radius)) {
                 bodies[i].pos_y = LOGICAL_HEIGHT - bodies[i].radius;
-                bodies[i].vel_y = 0 - bodies[i].vel_y;
+                bodies[i].vel_y = 0 - bodies[i].vel_y / 4;
             }
 
             // Draw bodies
