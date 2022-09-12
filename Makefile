@@ -1,7 +1,7 @@
 CFLAGS=-std=c99 -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing \
 	   -Wstrict-overflow -Wextra -Wall
 DEBUGFLAGS=-g -Og
-RELEASEFLAGS=-O3
+RELEASEFLAGS=-O3 -s
 LIBS=-lSDL2 -lm
 
 nbody: src/*
