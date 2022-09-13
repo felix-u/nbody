@@ -26,14 +26,25 @@
 const float SCALE_X = SCREEN_WIDTH / LOGICAL_WIDTH;
 const float SCALE_Y = SCREEN_HEIGHT / LOGICAL_HEIGHT;
 
-const RGB CLR_BG     = {  20,  31,  64 };
-const RGB CLR_BLUE   = {  93, 161, 224 };
-const RGB CLR_PURPLE = { 126, 112, 205 };
-const RGB CLR_PINK   = { 198, 131, 211 };
-const RGB CLR_RED    = { 198,  93, 130 };
-const RGB CLR_ORANGE = { 220, 169, 123 };
-const RGB CLR_YELLOW = { 205, 172, 112 };
-const RGB CLR_FG     = { 202, 193, 251 };
+// 16-colour palette
+const RGB CLR[16] = {
+    {  29,  43,  69 }, // 00 - BLACK
+    { 111,  67, 103 }, // 01 - RED
+    { 159, 173, 131 }, // 02 - GREEN
+    { 240, 177, 115 }, // 03 - YELLOW
+    {  86, 104, 143 }, // 04 - BLUE
+    { 166, 154, 202 }, // 05 - MAGENTA
+    { 123, 151, 157 }, // 06 - CYAN
+    { 140, 140, 162 }, // 07 - GREY
+    {  52,  52,  97 }, // 08 - LIGHT BLACK
+    { 231, 109, 138 }, // 09 - LIGHT RED
+    { 201, 201, 154 }, // 10 - LIGHT GREEN
+    { 245, 200, 171 }, // 11 - LIGHT YELLOW
+    {  37,  54,  87 }, // 12 - LIGHT BLUE
+    { 245, 161, 161 }, // 13 - LIGHT MAGENTA
+    { 152, 179, 175 }, // 14 - LIGHT CYAN
+    { 248, 223, 229 }, // 15 - WHITE
+};
 
 int drawCircle(SDL_Renderer *renderer, int x0, int y0, int radius);
 int fillCircle(SDL_Renderer *renderer, int x, int y, int radius);
@@ -99,18 +110,6 @@ int main() {
 
     SDL_ShowCursor(SDL_DISABLE);
 
-    // // const int default_body_radius = cursor_radius_max * 2;
-    // const int default_body_radius = 2;
-    // Body default_body = {
-    //     LOGICAL_WIDTH / 2.0,    // pos_x
-    //     LOGICAL_HEIGHT / 2.0,   // pos_y
-    //     1.0,                    // vel_x
-    //     0.0,                    // vel_y
-    //     default_body_radius,    // radius
-    //     default_body_radius * default_body_radius * default_body_radius * (4.0 / 3.0) * PI,  // mass
-    // };
-    // bodies[0] = default_body;
-
 
     // EVENT LOOP
 
@@ -127,7 +126,7 @@ int main() {
         SDL_Event event;
 
         // Draw background
-        SDL_SetRenderDrawColor(renderer, CLR_BG.r, CLR_BG.g, CLR_BG.b, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR[15].r, CLR[15].g, CLR[15].b, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
         // Make sure we have the latest mouse state
@@ -138,17 +137,17 @@ int main() {
         win_y = mouse_y / SCALE_Y;
 
         // Add body on left click
-        SDL_SetRenderDrawColor(renderer, CLR_FG.r, CLR_FG.g, CLR_FG.b, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR[15].r, CLR[15].g, CLR[15].b, SDL_ALPHA_OPAQUE);
         if (mouse_buttons == 1 && last_frame_mouse_buttons != 1) {
             if (body_num < body_num_max) {
 
-                const RGB *clr = &CLR_FG;
+                const RGB *clr = &CLR[15];
                 float clr_index = ((float)cursor_radius / (float)cursor_radius_max) * 100.0;
-                if (clr_index < 25) clr = &CLR_BLUE;
-                else if (clr_index < 50) clr = &CLR_PURPLE;
-                else if (clr_index < 70) clr = &CLR_RED;
-                else if (clr_index < 90) clr = &CLR_ORANGE;
-                else clr = &CLR_YELLOW;
+                if (clr_index < 25) clr = &CLR[4];
+                else if (clr_index < 50) clr = &CLR[5];
+                else if (clr_index < 70) clr = &CLR[9];
+                else if (clr_index < 90) clr = &CLR[13];
+                else clr = &CLR[11];
 
                 int rad = cursor_radius - 1;
 
@@ -223,7 +222,7 @@ int main() {
         }
 
         // Draw cursor
-        SDL_SetRenderDrawColor(renderer, CLR_PINK.r, CLR_PINK.g, CLR_PINK.r, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, CLR[0].r, CLR[0].g, CLR[0].r, SDL_ALPHA_OPAQUE);
         drawCircle(renderer, win_x, win_y, cursor_radius);
 
 
