@@ -44,10 +44,10 @@ int fillCircle(SDL_Renderer *renderer, int x, int y, int radius);
 int main() {
 
     // Initialise SDL
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
-		return EXIT_FAILURE;
-	}
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+        fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
 
     // Create window
     int32_t window_flags =
@@ -56,7 +56,7 @@ int main() {
         // SDL_WINDOW_RESIZABLE | // Enable at least this outside test builds
         // SDL_WINDOW_FULLSCREEN | // if not also this
         SDL_WINDOW_SHOWN;
-	SDL_Window* window = SDL_CreateWindow(
+    SDL_Window* window = SDL_CreateWindow(
         // Title
         "nbody",
         // Coordinates
@@ -65,20 +65,20 @@ int main() {
         SCREEN_WIDTH, SCREEN_HEIGHT,
         window_flags
     );
-	if (window == NULL) {
-		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
-		return EXIT_FAILURE;
-	}
+    if (window == NULL) {
+        fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
 
     // Create renderer
     uint8_t render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, render_flags);
-	if (renderer == NULL) {
-		fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-		return EXIT_FAILURE;
-	}
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, render_flags);
+    if (renderer == NULL) {
+        fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return EXIT_FAILURE;
+    }
 
     // Render at THIS resolution and scale up to SCREEN
     SDL_RenderSetLogicalSize(renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
@@ -244,16 +244,16 @@ int main() {
         }
 
         // Render
-		SDL_RenderPresent(renderer);
+        SDL_RenderPresent(renderer);
 
         last_frame_mouse_buttons = mouse_buttons;
-	}
+    }
 
 
     if (renderer) SDL_DestroyRenderer(renderer);
-	if (window) SDL_DestroyWindow(window);
-	SDL_Quit();
-	return EXIT_SUCCESS;
+    if (window) SDL_DestroyWindow(window);
+    SDL_Quit();
+    return EXIT_SUCCESS;
 }
 
 
