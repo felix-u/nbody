@@ -18,10 +18,12 @@
 
 #define PI 3.142857
 
-#define SCREEN_WIDTH 1600.
-#define SCREEN_HEIGHT 900.
 #define LOGICAL_WIDTH 640.
 #define LOGICAL_HEIGHT 360.
+#define SCALE 2
+
+#define SCREEN_WIDTH LOGICAL_WIDTH*SCALE
+#define SCREEN_HEIGHT LOGICAL_HEIGHT*SCALE
 
 const float SCALE_X = SCREEN_WIDTH / LOGICAL_WIDTH;
 const float SCALE_Y = SCREEN_HEIGHT / LOGICAL_HEIGHT;
@@ -49,7 +51,9 @@ const RGB CLR[16] = {
 int drawCircle(SDL_Renderer *renderer, int x0, int y0, int radius);
 int fillCircle(SDL_Renderer *renderer, int x, int y, int radius);
 
-#define TIMESCALE 3;
+#define TIMESCALE 3
+#define DAMPEN_SCALE 4
+#define PRINT_ENERGY true
 
 
 int main() {
@@ -108,6 +112,7 @@ int main() {
     const int cursor_radius_max = 20;
     const int cursor_radius_min = 2;
 
+
     SDL_ShowCursor(SDL_DISABLE);
 
 
@@ -117,7 +122,10 @@ int main() {
     int NOW = SDL_GetPerformanceCounter();
     int LAST = 0;
     double delta = 0;
+    // double energy = 0;
     while (!done) {
+
+        // energy = 0;
 
         LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
@@ -164,8 +172,27 @@ int main() {
             else SDL_Log("Reached max number of bodies: %d\n", body_num);
         }
 
-        // Calculate gravity
         for (int i = 0; i < body_num; i++) {
+
+            // Bound to screenspace by "reflecting" on collision - with dampening!
+            if (bodies[i].pos_x <= bodies[i].radius) {
+                bodies[i].pos_x = bodies[i].radius;
+                bodies[i].vel_x = 0 - bodies[i].vel_x / DAMPEN_SCALE;
+            }
+            else if (bodies[i].pos_x >= (LOGICAL_WIDTH - bodies[i].radius)) {
+                bodies[i].pos_x = LOGICAL_WIDTH - bodies[i].radius;
+                bodies[i].vel_x = 0 - bodies[i].vel_x / DAMPEN_SCALE;
+            }
+            if (bodies[i].pos_y <= bodies[i].radius) {
+                bodies[i].pos_y = bodies[i].radius;
+                bodies[i].vel_y = 0 - bodies[i].vel_y / DAMPEN_SCALE;
+            }
+            else if (bodies[i].pos_y >= (LOGICAL_HEIGHT - bodies[i].radius)) {
+                bodies[i].pos_y = LOGICAL_HEIGHT - bodies[i].radius;
+                bodies[i].vel_y = 0 - bodies[i].vel_y / DAMPEN_SCALE;
+            }
+
+            // Calculate gravity
             for (int cmp = i + 1; cmp < body_num; cmp++) {
 
                 // @Speed I'm sure there are obvious optimisations I could do here @Speed
@@ -177,8 +204,9 @@ int main() {
                 // @Missing Odd behaviour at close encounters. Consider implementing collisions and having the larger
                 // body "eat" the smaller one upon impact @Missing
 
+                double force = 0;
                 if (dist >= (bodies[i].radius + bodies[cmp].radius) / 2.0) {
-                    double force = forceBetween(dist, bodies[i].mass, bodies[cmp].mass) * delta * TIMESCALE;
+                    force = forceBetween(dist, bodies[i].mass, bodies[cmp].mass) * delta * TIMESCALE;
                     double body_accel = force / bodies[i].mass;
                     double body_cmp_accel = force / bodies[cmp].mass;
                     double body_accel_x = body_accel * (dist_x / dist);
@@ -191,35 +219,22 @@ int main() {
                     bodies[cmp].vel_x += body_cmp_accel_x;
                     bodies[cmp].vel_y += body_cmp_accel_y;
                 }
+
+                // energy += 2 * force * dist;
             }
+            // energy += 0.5 * bodies[i].mass * ( pow(bodies[i].vel_x, 2) + pow(bodies[i].vel_y, 2) );
 
             // Increment position by velocity
             bodies[i].pos_x += bodies[i].vel_x;
             bodies[i].pos_y += bodies[i].vel_y;
-
-            // Bound to screenspace by "reflecting" on collision - with dampening!
-            if (bodies[i].pos_x <= bodies[i].radius) {
-                bodies[i].pos_x = bodies[i].radius;
-                bodies[i].vel_x = 0 - bodies[i].vel_x / 4;
-            }
-            else if (bodies[i].pos_x >= (LOGICAL_WIDTH - bodies[i].radius)) {
-                bodies[i].pos_x = LOGICAL_WIDTH - bodies[i].radius;
-                bodies[i].vel_x = 0 - bodies[i].vel_x / 4;
-            }
-            if (bodies[i].pos_y <= bodies[i].radius) {
-                bodies[i].pos_y = bodies[i].radius;
-                bodies[i].vel_y = 0 - bodies[i].vel_y / 4;
-            }
-            else if (bodies[i].pos_y >= (LOGICAL_HEIGHT - bodies[i].radius)) {
-                bodies[i].pos_y = LOGICAL_HEIGHT - bodies[i].radius;
-                bodies[i].vel_y = 0 - bodies[i].vel_y / 4;
-            }
 
             // Draw bodies
             SDL_SetRenderDrawColor(renderer, bodies[i].clr.r, bodies[i].clr.g, bodies[i].clr.b, SDL_ALPHA_OPAQUE);
             fillCircle(renderer, bodies[i].pos_x, bodies[i].pos_y, bodies[i].radius);
 
         }
+
+        // SDL_Log("Total energy: %0.2f\n", energy);
 
         // Draw cursor
         SDL_SetRenderDrawColor(renderer, CLR[0].r, CLR[0].g, CLR[0].r, SDL_ALPHA_OPAQUE);
