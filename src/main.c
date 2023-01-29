@@ -59,7 +59,8 @@ int fillCircle(SDL_Renderer *renderer, int x, int y, int radius);
 int main() {
 
     // Initialise SDL
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
