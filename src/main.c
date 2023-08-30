@@ -45,7 +45,7 @@ const RGB CLR[16] = {
     {  37,  54,  87 }, // 12 - LIGHT BLUE
     { 245, 161, 161 }, // 13 - LIGHT MAGENTA
     { 152, 179, 175 }, // 14 - LIGHT CYAN
-    { 248, 223, 229 }, // 15 - WHITE
+    { 255, 255, 255 }, // 15 - WHITE
 };
 
 int drawCircle(SDL_Renderer *renderer, int x0, int y0, int radius);
